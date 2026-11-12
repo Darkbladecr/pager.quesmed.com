@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Directory</title>
+<style>
+:root{--teal:#0f8a8a;--ink:#1f1b4d;--mute:#9a97b5;--blue:#5a5af0;--orange:#f2694a;--field:#f1f0f7;--line:#ececf3;--bg:#fff;--card:#fafafc;--page:#e9eaf0}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--ink:#ecebff;--mute:#8b88aa;--blue:#8c8cff;--orange:#ff8a6b;--field:#26243d;--line:#2c2a45;--bg:#16152a;--card:#1d1c35;--page:#0d0c1a}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--page);font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;color:var(--ink);display:flex;justify-content:center}
+.app{width:100%;max-width:430px;height:100%;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden}
+@media(min-width:500px){body{align-items:center}.app{height:min(880px,96vh);border-radius:36px;box-shadow:0 20px 60px rgba(0,0,0,.2)}}
+header{background:var(--teal);color:#fff;text-align:center;font-weight:600;font-size:17px;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 14px;position:relative}
+header button{position:absolute;right:18px;bottom:8px;background:none;border:0;color:#fff;font-size:30px;line-height:1;cursor:pointer;padding:4px 6px}
+.top{padding:20px 20px 14px;border-bottom:1px solid var(--line)}
+.select{display:flex;align-items:center;gap:10px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-weight:600;font-size:15px;color:var(--ink);opacity:.85;font-family:inherit}
+.select span{flex:1;text-align:left}
+.search{margin-top:16px;display:flex;align-items:center;gap:10px;background:var(--field);border-radius:12px;padding:0 14px}
+.search input{flex:1;border:0;background:none;outline:none;font:inherit;font-size:17px;padding:14px 0;color:var(--ink);min-width:0}
+.search input::placeholder{color:var(--mute)}
+.search svg,.select svg{flex:none;color:var(--mute)}
+.clear{background:none;border:0;color:var(--mute);font-size:20px;cursor:pointer;display:none;padding:0}
+.list{flex:1;overflow-y:auto;padding:0 20px env(safe-area-inset-bottom,0px)}
+.item{display:flex;align-items:center;padding:18px 0 14px;position:relative}
+.item .info{flex:1;min-width:0}
+.name{font-size:19px;font-weight:500;line-height:1.25;margin-bottom:8px}
+.nums{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.num{font-size:17px;font-weight:500;color:var(--blue);text-decoration:none;font-variant-numeric:tabular-nums}
+.num.mobile{color:var(--orange)}
+.type{font-size:17px;color:var(--mute)}
+.more{background:none;border:0;color:var(--mute);padding:10px 4px 10px 14px;cursor:pointer}
+mark{background:rgba(242,190,60,.35);color:inherit;border-radius:3px}
+.menu{position:absolute;right:0;top:48px;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:5;overflow:hidden;min-width:150px}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:12px 16px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer}
+.menu button:hover{background:var(--field)}
+.empty{text-align:center;color:var(--mute);padding:60px 0}
+.count{font-size:13px;color:var(--mute);padding:12px 0 0}
+.select:disabled{cursor:default}
+.modal{position:absolute;inset:0;background:rgba(15,12,40,.5);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.modal[hidden]{display:none}
+.sheet{width:100%;background:var(--bg);border-radius:24px 24px 0 0;padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 20px);box-shadow:0 -8px 30px rgba(0,0,0,.2)}
+@media(min-width:500px){.modal{align-items:center;padding:20px}.sheet{border-radius:20px}}
+.sheet h2{margin:0 0 18px;font-size:20px;font-weight:600}
+.field{margin-bottom:16px}
+.field label,.field .lbl{display:block;font-size:13px;font-weight:600;color:var(--mute);margin-bottom:6px}
+.field input[type=text]{width:100%;border:1.5px solid transparent;background:var(--field);border-radius:12px;padding:13px 14px;font:inherit;font-size:16px;color:var(--ink);outline:none}
+.field input[type=text]:focus{border-color:var(--teal)}
+.hint{font-size:12px;color:var(--mute);margin-top:6px}
+.err{font-size:12px;color:var(--orange);margin-top:6px}
+.seg{display:flex;gap:8px}
+.seg label{flex:1;margin:0;position:relative}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;padding:12px;border-radius:12px;background:var(--field);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer;border:1.5px solid transparent}
+.seg input:checked+span{border-color:var(--teal);background:rgba(15,138,138,.12);color:var(--teal);font-weight:600}
+.seg input:focus-visible+span{outline:2px solid var(--teal)}
+.actions{display:flex;gap:12px;margin-top:22px}
+.actions button{flex:1;padding:14px;border-radius:12px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;border:0}
+.btn-cancel{background:var(--field);color:var(--ink)}
+.btn-save{background:var(--teal);color:#fff}
+.btn-del{background:var(--orange);color:#fff}
+.modal.center{align-items:center;padding:20px}
+.dialog{width:100%;background:var(--bg);border-radius:20px;padding:22px 20px 20px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.dialog h2{margin:0 0 8px;font-size:20px;font-weight:600}
+.dialog p{margin:0;color:var(--mute);font-size:15px;line-height:1.4}
+.menu button.danger{color:var(--orange)}
+.toast{z-index:30;position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:.2s;pointer-events:none}
+.toast.show{opacity:1}
+</style></head>
+<body>
+<div class="app">
+  <header>Directory<button aria-label="Add" onclick="openModal()">+</button></header>
+  <div class="top">
+    <button class="select" disabled><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c1-2 7-2 8 0"/></svg><span>Directory for Montefiore</span><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+    <label class="search"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg><input id="q" type="search" placeholder="Search" autocomplete="off" aria-label="Search directory"><button class="clear" id="clr" aria-label="Clear">×</button></label>
+  </div>
+  <div class="list" id="list"></div>
+  <div class="modal" id="modal" hidden>
+    <form class="sheet" id="form" novalidate role="dialog" aria-modal="true" aria-labelledby="mTitle">
+      <h2 id="mTitle">Add entry</h2>
+      <div class="field"><label for="fName">Name</label><input type="text" id="fName" autocomplete="off" placeholder="e.g. Day Surgery"><div class="err" id="eName"></div></div>
+      <div class="field"><label for="fNum">Number</label><input type="text" id="fNum" autocomplete="off" placeholder="e.g. 1234"><div class="hint">Separate multiple numbers with /</div><div class="err" id="eNum"></div></div>
+      <div class="field"><div class="lbl" id="lblType">Type</div><div class="seg" role="radiogroup" aria-labelledby="lblType"><label><input type="radio" name="type" value="Extension" checked><span>Extension</span></label><label><input type="radio" name="type" value="Mobile"><span>Mobile</span></label></div></div>
+      <div class="actions"><button type="button" class="btn-cancel" id="cancel">Cancel</button><button type="submit" class="btn-save">Save</button></div>
+    </form>
+  </div>
+  <div class="modal center" id="confirm" hidden>
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cText">
+      <h2 id="cTitle">Delete entry</h2>
+      <p id="cText"></p>
+      <div class="actions"><button type="button" class="btn-cancel" id="cCancel">Cancel</button><button type="button" class="btn-del" id="cDelete">Delete</button></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+const CSV = `﻿name,number,type
+admitting / bed board,6651/2967/5001,Ext
+ambulatory,5366,Ext
+anesthesia,4316/5535/4491,Ext
+anesthesia cell,917-669-3357,Mobile
+anticoagulation clinic,5907,Ext
+Blood bank,4786,Ext
+Blood Gas,7796/6503,Ext
+CCU,4413,Ext
+Central supply,4371,Ext
+Chemistry Lab,4181/4695/2465,Ext
+Computer HelpLine,4554,Ext
+Critical Care Conference Room,4218,Ext
+CT ER,8853,Ext
+CT Manager,2554,Ext
+CT Scan,7202,Ext
+CT Scan Fellow,4396,Ext
+CT Scheduling,8265,Ext
+CT supervisor,347-637-0190,Mobile
+Death Certificates,2210,Ext
+Dialysis,5974/4775,Ext
+Echo,4807,Ext
+Echo Fellow,6199,Ext
+EEG,4311,Ext
+EEG reading Room,2693,Ext
+ER,5731,Ext
+Ethics,6226,Ext
+Front Security,7786,Ext
+GI suite,4154,Ext
+Hematology Lab,5307/5222,Ext
+Human Resources,4501,Ext
+ID Consult,718-430-3663,Mobile
+Interpreter,718-920-8255,Mobile
+Interventional Radiology,5729/8200,Ext
+Lab send out,6780,Ext
+Live On NY,800-443-8469,Mobile
+Locksmith,5240,Ext
+LTM,917-956-6623,Mobile
+Microbiology,4695,Ext
+MICU,4411,Ext
+Monte home care,4343,Ext
+MRI,8297/8209,Ext
+N7AE transplant,5218,Ext
+N7AE vascular,4581,Ext
+N7AW ortho,4611,Ext
+N7B,4601,Ext
+N7B stepdown,6763,Ext
+Neuro conference room,2254,Ext
+neuroradiology,4030,Ext
+Nuclear Medicine,5011/5144/5013,Ext
+Nutrition,2272/2773,Ext
+NW1,4731,Ext
+OR Front desk,4491,Ext
+OR lounge,5268,Ext
+PACU,4477,Ext
+Page operator,0/4242,Ext
+Palliative Care,6378,Ext
+Parking Office,5691,Ext
+Pathology,4976/5868/5036,Ext
+Patient's Belongings,6131,Ext
+Pharmacy,4103,Ext
+Pharmacy satellite,5335,Ext
+PICC line,7738,Ext
+PICC line phone,917-956-6687,Mobile
+PICU,2800,Ext
+PICU Gold Team,347-920-0885,Mobile
+Radiology Reading Room,4879,Ext
+Respiratory,4969,Ext
+Respiratory Therapy,917-641-0439,Mobile
+RTAS,5848,Ext
+Security,5668,Ext
+Social Work Office,4545,Ext
+Speech and Swallow,4646,Ext
+Tube room,5351,Ext
+TV repair,8400,Ext
+Ultrasound,4070/5125,Ext
+Vascular Lab,6603,Ext
+XR portable,2290,Ext
+Xray,4861/4873,Ext`;
+function parse(t){const rows=[];let r=[],c='',q=false;t=t.replace(/^\uFEFF/,'');
+ for(let i=0;i<t.length;i++){const ch=t[i];
+  if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}
+  else if(ch=='"')q=true;else if(ch==','){r.push(c);c=''}
+  else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}
+  else c+=ch}
+ if(c||r.length){r.push(c);rows.push(r)}return rows}
+const [head,...body]=parse(CSV);
+const titleCase=s=>s.trim().replace(/\s+/g,' ').replace(/[A-Za-z0-9']+/g,w=>(w.length>1&&w===w.toUpperCase())?w:w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
+const label=t=>/^ext/i.test(t)?'Extension':/^bleep/i.test(t)?'Bleep':t.trim();
+const DATA=body.map(r=>({name:titleCase(r[0]),numbers:r[1].split('/').map(s=>s.trim()).filter(Boolean),type:label(r[2]||'')}))
+  .sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+const $=id=>document.getElementById(id),list=$('list'),q=$('q');
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+function hl(s,t){if(!t)return esc(s);const i=s.toLowerCase().indexOf(t.toLowerCase());
+ return i<0?esc(s):esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+t.length))+'</mark>'+esc(s.slice(i+t.length))}
+function render(){
+  const t=q.value.trim(),nt=norm(t);$('clr').style.display=t?'block':'none';
+  const res=!t?DATA:DATA.filter(d=>{
+    const hay=(d.name+' '+d.type).toLowerCase();
+    return t.toLowerCase().split(/\s+/).every(w=>hay.includes(w))||(nt&&d.numbers.some(n=>norm(n).includes(nt)))});
+  if(!res.length){list.innerHTML='<div class="empty">No entries match “'+esc(t)+'”</div>';return}
+  list.innerHTML=(t?'<div class="count">'+res.length+' result'+(res.length>1?'s':'')+'</div>':'')+res.map((d,i)=>{
+    const mob=/mobile/i.test(d.type);
+    const nums=d.numbers.map(n=>'<a class="num'+(mob?' mobile':'')+'" href="tel:'+n.replace(/[^\d+]/g,'')+'">'+hl(n,t)+'</a>').join('');
+    return '<div class="item" data-i="'+DATA.indexOf(d)+'"><div class="info"><div class="name">'+hl(d.name,t)+'</div><div class="nums">'+nums+'<span class="type">'+esc(d.type)+'</span></div></div><button class="more" aria-label="More options"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>'}).join('')+'<div style="height:24px"></div>';
+}
+function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1600)}
+function closeMenu(){document.querySelectorAll('.menu').forEach(m=>m.remove())}
+list.addEventListener('click',e=>{
+  const b=e.target.closest('.more');if(!b){closeMenu();return}
+  e.stopPropagation();const had=b.parentNode.querySelector('.menu');closeMenu();if(had)return;
+  const d=DATA[b.parentNode.dataset.i];
+  const m=document.createElement('div');m.className='menu';
+  m.innerHTML='<button data-a="edit">Edit</button><button data-a="copy">Copy number</button><button data-a="call">Call</button><button data-a="delete" class="danger">Delete</button>';
+  m.onclick=ev=>{const a=ev.target.dataset.a;if(a=='edit'){closeMenu();openModal(d);return}if(a=='delete'){closeMenu();openConfirm(d);return}if(a=='copy'){const full=/^ext/i.test(d.type)?'718-920-'+d.numbers[0]:d.numbers[0];try{navigator.clipboard.writeText(full)}catch(_){}toast('Copied '+full)}
+    if(a=='call')location.href='tel:'+d.numbers[0].replace(/[^\d+]/g,'');closeMenu()};
+  b.parentNode.appendChild(m)});
+document.addEventListener('click',closeMenu);
+const modal=$('modal'),form=$('form'),fName=$('fName'),fNum=$('fNum');
+let editing=null;
+function openModal(d){
+  closeMenu();editing=d||null;
+  $('mTitle').textContent=d?'Edit entry':'Add entry';
+  fName.value=d?d.name:'';fNum.value=d?d.numbers.join(' / '):'';
+  document.querySelector('input[name=type][value='+(d&&/mobile/i.test(d.type)?'Mobile':'Extension')+']').checked=true;
+  $('eName').textContent='';$('eNum').textContent='';
+  modal.hidden=false;setTimeout(()=>fName.focus(),50);
+}
+function closeModal(){modal.hidden=true;editing=null}
+$('cancel').onclick=closeModal;
+modal.addEventListener('mousedown',e=>{if(e.target===modal)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeModal()});
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=titleCase(fName.value),numbers=fNum.value.split('/').map(s=>s.trim()).filter(Boolean),type=document.querySelector('input[name=type]:checked').value;
+  $('eName').textContent=name?'':'Name is required';
+  $('eNum').textContent=numbers.length?'':'Number is required';
+  if(!name||!numbers.length)return;
+  const isEdit=!!editing;let entry=editing;
+  if(isEdit)Object.assign(entry,{name,numbers,type});
+  else{entry={name,numbers,type};DATA.push(entry);q.value=''}
+  DATA.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+  closeModal();render();
+  const el=list.querySelector('[data-i="'+DATA.indexOf(entry)+'"]');if(el)el.scrollIntoView({block:'nearest'});
+  toast(isEdit?'Entry updated':'Entry added');
+});
+const cModal=$('confirm');let toDelete=null;
+function openConfirm(d){toDelete=d;$('cText').textContent='Delete “'+d.name+'”? This can’t be undone.';cModal.hidden=false;setTimeout(()=>$('cCancel').focus(),50)}
+function closeConfirm(){cModal.hidden=true;toDelete=null}
+$('cCancel').onclick=closeConfirm;
+$('cDelete').onclick=()=>{const i=DATA.indexOf(toDelete);if(i>-1)DATA.splice(i,1);closeConfirm();render();toast('Entry deleted')};
+cModal.addEventListener('mousedown',e=>{if(e.target===cModal)closeConfirm()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!cModal.hidden)closeConfirm()});
+q.addEventListener('input',render);
+$('clr').onclick=e=>{e.preventDefault();q.value='';render();q.focus()};
+render();
+</script></body></html>
