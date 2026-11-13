@@ -107,6 +107,11 @@ async function api(method,query,body){
   if(!res.ok){let m='';try{m=(await res.json()).message}catch(_){}throw new Error(m||('Request failed ('+res.status+')'))}
   return method==='GET'?res.json():null;
 }
+function track(id){
+  try{fetch('https://scwrjfntaopnfzlwccyv.supabase.co/rest/v1/rpc/increment_count',{method:'POST',keepalive:true,
+    headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
+    body:JSON.stringify({row_id:id})}).catch(()=>{})}catch(_){}
+}
 const titleCase=s=>s.trim().replace(/\s+/g,' ').replace(/[A-Za-z0-9']+/g,w=>(w.length>1&&w===w.toUpperCase())?w:w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
 const toEntry=r=>({id:r.id,name:titleCase(String(r.name||'')),numbers:String(r.number==null?'':r.number).split('/').map(s=>s.trim()).filter(Boolean),type:r.extension?'Extension':'Mobile'});
 let DATA=[];
@@ -143,8 +148,8 @@ list.addEventListener('click',e=>{
   const d=DATA[b.parentNode.dataset.i];
   const m=document.createElement('div');m.className='menu';
   m.innerHTML='<button data-a="edit">Edit</button><button data-a="copy">Copy number</button><button data-a="call">Call</button><button data-a="delete" class="danger">Delete</button>';
-  m.onclick=ev=>{const a=ev.target.dataset.a;if(a=='edit'){closeMenu();openModal(d);return}if(a=='delete'){closeMenu();openConfirm(d);return}if(a=='copy'){const full=/^ext/i.test(d.type)?'718-920-'+d.numbers[0]:d.numbers[0];try{navigator.clipboard.writeText(full)}catch(_){}toast('Copied '+full)}
-    if(a=='call')location.href='tel:'+d.numbers[0].replace(/[^\d+]/g,'');closeMenu()};
+  m.onclick=ev=>{const a=ev.target.dataset.a;if(a=='edit'){closeMenu();openModal(d);return}if(a=='delete'){closeMenu();openConfirm(d);return}if(a=='copy'){const full=/^ext/i.test(d.type)?'718-920-'+d.numbers[0]:d.numbers[0];try{navigator.clipboard.writeText(full)}catch(_){}track(d.id);toast('Copied '+full)}
+    if(a=='call'){track(d.id);location.href='tel:'+d.numbers[0].replace(/[^\d+]/g,'')}closeMenu()};
   b.parentNode.appendChild(m)});
 document.addEventListener('click',closeMenu);
 const modal=$('modal'),form=$('form'),fName=$('fName'),fNum=$('fNum');
