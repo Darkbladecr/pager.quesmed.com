@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
 <title>Directory</title>
 <style>
 :root{--teal:#0f8a8a;--ink:#1f1b4d;--mute:#9a97b5;--blue:#5a5af0;--orange:#f2694a;--field:#f1f0f7;--line:#ececf3;--bg:#fff;--card:#fafafc;--page:#e9eaf0}
@@ -63,6 +67,7 @@ mark{background:rgba(242,190,60,.35);color:inherit;border-radius:3px}
 .dialog h2{margin:0 0 8px;font-size:20px;font-weight:600}
 .dialog p{margin:0;color:var(--mute);font-size:15px;line-height:1.4}
 .menu button.danger{color:var(--orange)}
+.retry{margin-top:12px;background:var(--teal);color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
 .toast{z-index:30;position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:.2s;pointer-events:none}
 .toast.show{opacity:1}
 </style></head>
@@ -93,97 +98,27 @@ mark{background:rgba(242,190,60,.35);color:inherit;border-radius:3px}
   <div class="toast" id="toast"></div>
 </div>
 <script>
-const CSV = `﻿name,number,type
-admitting / bed board,6651/2967/5001,Ext
-ambulatory,5366,Ext
-anesthesia,4316/5535/4491,Ext
-anesthesia cell,917-669-3357,Mobile
-anticoagulation clinic,5907,Ext
-Blood bank,4786,Ext
-Blood Gas,7796/6503,Ext
-CCU,4413,Ext
-Central supply,4371,Ext
-Chemistry Lab,4181/4695/2465,Ext
-Computer HelpLine,4554,Ext
-Critical Care Conference Room,4218,Ext
-CT ER,8853,Ext
-CT Manager,2554,Ext
-CT Scan,7202,Ext
-CT Scan Fellow,4396,Ext
-CT Scheduling,8265,Ext
-CT supervisor,347-637-0190,Mobile
-Death Certificates,2210,Ext
-Dialysis,5974/4775,Ext
-Echo,4807,Ext
-Echo Fellow,6199,Ext
-EEG,4311,Ext
-EEG reading Room,2693,Ext
-ER,5731,Ext
-Ethics,6226,Ext
-Front Security,7786,Ext
-GI suite,4154,Ext
-Hematology Lab,5307/5222,Ext
-Human Resources,4501,Ext
-ID Consult,718-430-3663,Mobile
-Interpreter,718-920-8255,Mobile
-Interventional Radiology,5729/8200,Ext
-Lab send out,6780,Ext
-Live On NY,800-443-8469,Mobile
-Locksmith,5240,Ext
-LTM,917-956-6623,Mobile
-Microbiology,4695,Ext
-MICU,4411,Ext
-Monte home care,4343,Ext
-MRI,8297/8209,Ext
-N7AE transplant,5218,Ext
-N7AE vascular,4581,Ext
-N7AW ortho,4611,Ext
-N7B,4601,Ext
-N7B stepdown,6763,Ext
-Neuro conference room,2254,Ext
-neuroradiology,4030,Ext
-Nuclear Medicine,5011/5144/5013,Ext
-Nutrition,2272/2773,Ext
-NW1,4731,Ext
-OR Front desk,4491,Ext
-OR lounge,5268,Ext
-PACU,4477,Ext
-Page operator,0/4242,Ext
-Palliative Care,6378,Ext
-Parking Office,5691,Ext
-Pathology,4976/5868/5036,Ext
-Patient's Belongings,6131,Ext
-Pharmacy,4103,Ext
-Pharmacy satellite,5335,Ext
-PICC line,7738,Ext
-PICC line phone,917-956-6687,Mobile
-PICU,2800,Ext
-PICU Gold Team,347-920-0885,Mobile
-Radiology Reading Room,4879,Ext
-Respiratory,4969,Ext
-Respiratory Therapy,917-641-0439,Mobile
-RTAS,5848,Ext
-Security,5668,Ext
-Social Work Office,4545,Ext
-Speech and Swallow,4646,Ext
-Tube room,5351,Ext
-TV repair,8400,Ext
-Ultrasound,4070/5125,Ext
-Vascular Lab,6603,Ext
-XR portable,2290,Ext
-Xray,4861/4873,Ext`;
-function parse(t){const rows=[];let r=[],c='',q=false;t=t.replace(/^\uFEFF/,'');
- for(let i=0;i<t.length;i++){const ch=t[i];
-  if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}
-  else if(ch=='"')q=true;else if(ch==','){r.push(c);c=''}
-  else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}
-  else c+=ch}
- if(c||r.length){r.push(c);rows.push(r)}return rows}
-const [head,...body]=parse(CSV);
+const API='https://scwrjfntaopnfzlwccyv.supabase.co/rest/v1/entries';
+const KEY='sb_publishable_V64qmSxnAnbqHJZHjMLe_Q_AwM5n1ma';
+async function api(method,query,body){
+  const headers={apikey:KEY,Authorization:'Bearer '+KEY};
+  if(body){headers['Content-Type']='application/json';headers['Prefer']='return=minimal'}
+  const res=await fetch(API+query,{method,headers,body:body?JSON.stringify(body):undefined});
+  if(!res.ok){let m='';try{m=(await res.json()).message}catch(_){}throw new Error(m||('Request failed ('+res.status+')'))}
+  return method==='GET'?res.json():null;
+}
 const titleCase=s=>s.trim().replace(/\s+/g,' ').replace(/[A-Za-z0-9']+/g,w=>(w.length>1&&w===w.toUpperCase())?w:w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-const label=t=>/^ext/i.test(t)?'Extension':/^bleep/i.test(t)?'Bleep':t.trim();
-const DATA=body.map(r=>({name:titleCase(r[0]),numbers:r[1].split('/').map(s=>s.trim()).filter(Boolean),type:label(r[2]||'')}))
-  .sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+const toEntry=r=>({id:r.id,name:titleCase(String(r.name||'')),numbers:String(r.number==null?'':r.number).split('/').map(s=>s.trim()).filter(Boolean),type:r.extension?'Extension':'Mobile'});
+let DATA=[];
+async function refresh(){
+  const rows=await api('GET','?select=*');
+  DATA=rows.map(toEntry).sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+  render();
+}
+async function load(){
+  list.innerHTML='<div class="empty">Loading…</div>';
+  try{await refresh()}catch(e){list.innerHTML='<div class="empty">Couldn’t load the directory.<br><small>'+esc(e.message)+'</small><br><button class="retry" onclick="load()">Retry</button></div>'}
+}
 const $=id=>document.getElementById(id),list=$('list'),q=$('q');
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -194,7 +129,7 @@ function render(){
   const res=!t?DATA:DATA.filter(d=>{
     const hay=(d.name+' '+d.type).toLowerCase();
     return t.toLowerCase().split(/\s+/).every(w=>hay.includes(w))||(nt&&d.numbers.some(n=>norm(n).includes(nt)))});
-  if(!res.length){list.innerHTML='<div class="empty">No entries match “'+esc(t)+'”</div>';return}
+  if(!res.length){list.innerHTML='<div class="empty">'+(t?'No entries match “'+esc(t)+'”':'No entries yet')+'</div>';return}
   list.innerHTML=(t?'<div class="count">'+res.length+' result'+(res.length>1?'s':'')+'</div>':'')+res.map((d,i)=>{
     const mob=/mobile/i.test(d.type);
     const nums=d.numbers.map(n=>'<a class="num'+(mob?' mobile':'')+'" href="tel:'+n.replace(/[^\d+]/g,'')+'">'+hl(n,t)+'</a>').join('');
@@ -226,28 +161,33 @@ function closeModal(){modal.hidden=true;editing=null}
 $('cancel').onclick=closeModal;
 modal.addEventListener('mousedown',e=>{if(e.target===modal)closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeModal()});
-form.addEventListener('submit',e=>{
+form.addEventListener('submit',async e=>{
   e.preventDefault();
   const name=titleCase(fName.value),numbers=fNum.value.split('/').map(s=>s.trim()).filter(Boolean),type=document.querySelector('input[name=type]:checked').value;
   $('eName').textContent=name?'':'Name is required';
   $('eNum').textContent=numbers.length?'':'Number is required';
   if(!name||!numbers.length)return;
-  const isEdit=!!editing;let entry=editing;
-  if(isEdit)Object.assign(entry,{name,numbers,type});
-  else{entry={name,numbers,type};DATA.push(entry);q.value=''}
-  DATA.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
-  closeModal();render();
-  const el=list.querySelector('[data-i="'+DATA.indexOf(entry)+'"]');if(el)el.scrollIntoView({block:'nearest'});
-  toast(isEdit?'Entry updated':'Entry added');
+  const body={name,number:numbers.join('/'),extension:type==='Extension'};
+  const isEdit=!!editing,id=isEdit?editing.id:null,btn=form.querySelector('.btn-save');
+  btn.disabled=true;btn.textContent='Saving…';
+  try{
+    if(isEdit)await api('PATCH','?id=eq.'+id,body);
+    else{await api('POST','',body);q.value=''}
+    closeModal();await refresh();toast(isEdit?'Entry updated':'Entry added');
+  }catch(err){$('eNum').textContent='Couldn’t save: '+err.message}
+  finally{btn.disabled=false;btn.textContent='Save'}
 });
 const cModal=$('confirm');let toDelete=null;
 function openConfirm(d){toDelete=d;$('cText').textContent='Delete “'+d.name+'”? This can’t be undone.';cModal.hidden=false;setTimeout(()=>$('cCancel').focus(),50)}
 function closeConfirm(){cModal.hidden=true;toDelete=null}
 $('cCancel').onclick=closeConfirm;
-$('cDelete').onclick=()=>{const i=DATA.indexOf(toDelete);if(i>-1)DATA.splice(i,1);closeConfirm();render();toast('Entry deleted')};
+$('cDelete').onclick=async()=>{const d=toDelete,b=$('cDelete');b.disabled=true;
+  try{await api('DELETE','?id=eq.'+d.id);closeConfirm();await refresh();toast('Entry deleted')}
+  catch(e){closeConfirm();toast('Delete failed: '+e.message)}
+  finally{b.disabled=false}};
 cModal.addEventListener('mousedown',e=>{if(e.target===cModal)closeConfirm()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!cModal.hidden)closeConfirm()});
 q.addEventListener('input',render);
 $('clr').onclick=e=>{e.preventDefault();q.value='';render();q.focus()};
-render();
+load();
 </script></body></html>
