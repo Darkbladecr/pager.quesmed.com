@@ -149,7 +149,7 @@ list.addEventListener('click',e=>{
   const m=document.createElement('div');m.className='menu';
   m.innerHTML='<button data-a="edit">Edit</button><button data-a="copy">Copy number</button><button data-a="call">Call</button><button data-a="delete" class="danger">Delete</button>';
   m.onclick=ev=>{const a=ev.target.dataset.a;if(a=='edit'){closeMenu();openModal(d);return}if(a=='delete'){closeMenu();openConfirm(d);return}if(a=='copy'){const full=/^ext/i.test(d.type)?'718-920-'+d.numbers[0]:d.numbers[0];try{navigator.clipboard.writeText(full)}catch(_){}track(d.id);toast('Copied '+full)}
-    if(a=='call'){track(d.id);location.href='tel:'+d.numbers[0].replace(/[^\d+]/g,'')}closeMenu()};
+    if(a=='call'){track(d.id);const full=/^ext/i.test(d.type)?'718-920-'+d.numbers[0]:d.numbers[0];location.href='tel:'+full}closeMenu()};
   b.parentNode.appendChild(m)});
 document.addEventListener('click',closeMenu);
 const modal=$('modal'),form=$('form'),fName=$('fName'),fNum=$('fNum');
